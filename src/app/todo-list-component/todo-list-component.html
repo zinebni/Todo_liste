@@ -1,0 +1,80 @@
+<h1>Mes Tâches</h1>
+<div>
+    <!-- Message d'erreur -->
+    <p *ngIf="showError" style="color: red; font-weight: bold; margin-top: 5px;">
+            Le titre de la tâche ne peut pas être plus de 20 caractères.
+    </p>
+  <fieldset>
+    <legend>Ajouter une tâche</legend>
+    <form #taskForm="ngForm" (ngSubmit)="addTask(taskForm)">
+      <label for="title">Titre</label>
+      <input type="text" name="title" id="title" [(ngModel)]="newTask.title" />
+      <label for="completed">Completed</label>
+      <input type="checkbox" name="completed" id="completed" [(ngModel)]="newTask.completed" />
+      <button type="submit" [disabled]="!newTask.title?.trim()">Ajouter</button>
+    </form>
+  </fieldset>
+</div>
+
+<!-- Ici, on affiche soit le "Chargement...", soit le contenu -->
+<h1 [style.color]="isLoading ? 'green' : 'black'">
+  {{ isLoading ? 'Chargement...' : 'Liste des tâches' }}
+</h1>
+
+<!-- Bloc affiché seulement une fois le chargement terminé -->
+<div *ngIf="!isLoading; else loadingBlock">
+  <select name="currentFilter" id="currentFilter" [(ngModel)]="currentFilter">
+    <option value="all">Toutes</option>
+    <option value="active">Actives</option>
+    <option value="completed">Complétées</option>
+  </select>
+
+  @if(!filterTasks.length){
+    <p style="font-size: medium; font-weight: bold; color: red;">
+      Vous n'avez pas de tâches !
+    </p>
+  }@else{
+
+    <!-- Tableau des tâches -->
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>nom</th>
+          <th colspan="2">action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr [ngClass]="{'completed': t.completed}" *ngFor="let t of filterTasks; let i = index">
+          <td>{{ t.id }}</td>
+          <td><span style="color: red; font-weight: bold;">{{ t.title }}</span></td>
+          <td>
+            <input type="checkbox" [checked]="t.completed" (change)="toggleCompleted(i)">
+            <button (click)="deleteTask(i)">Supprimer</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <button *ngIf=" completedTasksCount > 0" class= "btn bg-danger" (click)="clearCompletedTasks()">Supprimer les tâches complétées</button>
+  
+  }
+</div>
+
+<ng-template #loadingBlock>
+  <p style="color: gray;">Chargement des tâches...</p>
+</ng-template>
+
+<!-- Résumé -->
+<div *ngIf="!isLoading">
+  <h1>Résumé des tâches</h1>
+  <p>Nombre des tâches non complètes :
+    <span style="color: red;">{{ uncompletedTasksCount }}</span>
+  </p>
+  <p>Nombre des tâches complètes :
+    <span style="color: green;">{{ completedTasksCount }}</span>
+  </p>
+  <p style="font-size: medium; font-weight: bold; color: blue;">
+      Total des tâches : {{ tasks.length }}
+</p>
+</div>
